@@ -63,8 +63,9 @@ remove_and_optionally_restore "$HOME_DIR/.nanorc"
 remove_and_optionally_restore "$HOME_DIR/.nano"
 
 # --- Nur bei Aufruf via curl: ~/.nano-config löschen ---
-AUTO_REPO="$HOME_DIR/.nano-config"
-if [[ -z "$BASH_SOURCE" ]] && [ -d "$AUTO_REPO" ]; then
+AUTO_REPO="$HOME/.nano-config"
+
+if [[ "$0" == "bash" ]] && [ -d "$AUTO_REPO" ]; then
     echo ""
     read -r -p "❓ $MSG_PROMPT_DELETE_REPO " answer
     if [[ "$LANG" =~ ^de ]]; then
