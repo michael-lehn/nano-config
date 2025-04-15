@@ -1,0 +1,5 @@
+set background dark
+include "~/.nano/*.nanorc"
+set tabsize 4
+set tabstospaces
+set linenumbers

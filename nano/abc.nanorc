@@ -1,0 +1,45 @@
+syntax "abc" "\.abc$"
+comment "//"
+color red "\<(0x)?[0-9]+\>"
+color green "\<(label|fn|_fn|for|do|while|if|else|then|local|global|static|extern|array|of|type|let|sizeof|cast|switch|case|default|struct|union|enum)\>"
+
+color green "\<(goto|continue|break|return)\>"
+color red "^[[:space:]]*#[[:space:]]*(define|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
+color brightred "'([^'\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
+
+##
+## GCC builtins
+color green "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
+
+#Operator Color
+color black "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
+
+#Parenthetical Color
+color black "[(){}]" "\[" "\]"
+
+
+##
+## String highlighting.  You will in general want your comments and
+## strings to come last, because syntax highlighting rules will be
+## applied in the order they are read in.
+color brightred "<[^= 	]*>" ""(\\.|[^"])*""
+##
+## This string is VERY resource intensive!
+#color cyan start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
+
+## printf-family format specifiers
+color red "%(\#|(0-+))?(hh|h|l|ll|q|L|j|z|Z|t)?[A-Za-z]" "%%"
+color red "\\[abfnrtv\"'\\]" "\\x[0-9A-Fa-f]{1,2}" "\\[0-3]?[0-7]{1,2}"
+
+
+## Comment highlighting
+color blue "//.*"
+color blue start="/\*" end="\*/"
+
+# Highlighting for documentation comments
+color magenta "@param [a-zA-Z_][a-z0-9A-Z_]+"
+color magenta "@return"
+color magenta "@author.*"
+
+## Trailing whitespace
+color ,green "[[:space:]]+$"

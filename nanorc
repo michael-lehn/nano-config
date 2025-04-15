@@ -1,0 +1,17 @@
+include "~/.nano/*.nanorc"
+set tabsize 4
+set tabstospaces
+set linenumbers
+set guidestripe 81
+set whitespace "> "
+set mouse
+
+set titlecolor brightwhite,yellow
+set keycolor white,blue
+set functioncolor normal,normal
+set numbercolor white,magenta
+set errorcolor brightwhite,red
+set selectedcolor black,white
+set stripecolor black,white
+set statuscolor black,white
+
