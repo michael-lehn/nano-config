@@ -2,6 +2,12 @@
 
 set -e
 
+# --- Argumentverarbeitung ---
+NONINTERACTIVE=0
+if [[ "$1" == "--noninteractive" ]]; then
+    NONINTERACTIVE=1
+fi
+
 # --- Sprachumschaltung ---
 if [[ "$LANG" =~ ^de ]]; then
     MSG_REMOVING="Entferne symbolischen Link:"
@@ -48,11 +54,13 @@ remove_and_optionally_restore() {
         echo "🗑  $MSG_REMOVING $target"
         rm "$target"
 
-        read -r -p "❓ $MSG_PROMPT_RESTORE " answer
-        if [[ "$LANG" =~ ^de ]]; then
-            [[ "$answer" =~ ^[Jj] ]] && restore_latest_backup "$base"
-        else
-            [[ "$answer" =~ ^[Yy] ]] && restore_latest_backup "$base"
+        if [[ "$NONINTERACTIVE" -eq 0 ]]; then
+            read -r -p "❓ $MSG_PROMPT_RESTORE " answer
+            if [[ "$LANG" =~ ^de ]]; then
+                [[ "$answer" =~ ^[Jj] ]] && restore_latest_backup "$base"
+            else
+                [[ "$answer" =~ ^[Yy] ]] && restore_latest_backup "$base"
+            fi
         fi
     else
         echo "ℹ️  $target is not a symbolic link – skipping."
@@ -62,16 +70,20 @@ remove_and_optionally_restore() {
 remove_and_optionally_restore "$HOME_DIR/.nanorc"
 remove_and_optionally_restore "$HOME_DIR/.nano"
 
-# --- Nur bei Aufruf via curl: ~/.nano-config löschen ---
+# --- Optionales Löschen von ~/.nano-config ---
 AUTO_REPO="$HOME/.nano-config"
-
-if [[ "$0" == "bash" ]] && [ -d "$AUTO_REPO" ]; then
-    echo ""
-    read -r -p "❓ $MSG_PROMPT_DELETE_REPO " answer
-    if [[ "$LANG" =~ ^de ]]; then
-        [[ "$answer" =~ ^[Jj] ]] && rm -rf "$AUTO_REPO" && echo "🗑️  $MSG_DELETED $AUTO_REPO"
+if [[ "$(pwd)" != "$AUTO_REPO" ]] && [ -d "$AUTO_REPO" ]; then
+    if [[ "$NONINTERACTIVE" -eq 1 ]]; then
+        rm -rf "$AUTO_REPO"
+        echo "🗑️  $MSG_DELETED $AUTO_REPO"
     else
-        [[ "$answer" =~ ^[Yy] ]] && rm -rf "$AUTO_REPO" && echo "🗑️  $MSG_DELETED $AUTO_REPO"
+        echo ""
+        read -r -p "❓ $MSG_PROMPT_DELETE_REPO " answer
+        if [[ "$LANG" =~ ^de ]]; then
+            [[ "$answer" =~ ^[Jj] ]] && rm -rf "$AUTO_REPO" && echo "🗑️  $MSG_DELETED $AUTO_REPO"
+        else
+            [[ "$answer" =~ ^[Yy] ]] && rm -rf "$AUTO_REPO" && echo "🗑️  $MSG_DELETED $AUTO_REPO"
+        fi
     fi
 fi
 
