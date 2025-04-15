@@ -11,15 +11,15 @@ and updated, while safely preserving any existing user configuration.
 ### 1. Clone and install (recommended)
 
 ```bash
-git clone https://github.com/yourusername/nano-config-student.git
-cd nano-config-student
+git clone https://github.com/michael-lehn/nano-config.git
+cd nano-config
 ./install.sh
 ```
 
 ### 2. Alternatively, install directly using `curl`
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/nano-config-student/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/michael-lehn/nano-config/main/install.sh | bash
 ```
 
 ---
