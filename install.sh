@@ -8,21 +8,31 @@ if [[ "$LANG" =~ ^de ]]; then
     MSG_LINKED="Verknüpft"
     MSG_INSTALLING="Installiere nano-Konfiguration..."
     MSG_DONE="Fertig! Du kannst jetzt nano wie gewohnt verwenden."
-    MSG_PULL="Mit 'git pull' im Repo-Ordner bekommst du künftige Updates."
+    MSG_PULL="Mit 'git pull' im Ordner ~/.nano-config bekommst du künftige Updates."
+    MSG_CLONE="Klonen des Repositories nach ~/.nano-config..."
 else
     MSG_BACKUP="Backed up"
     MSG_EXISTS="already exists – backing it up"
     MSG_LINKED="Linked"
     MSG_INSTALLING="Installing nano configuration..."
     MSG_DONE="Done! You can now use nano as usual."
-    MSG_PULL="Use 'git pull' in the repo folder to get future updates."
+    MSG_PULL="Use 'git pull' in the ~/.nano-config folder to get future updates."
+    MSG_CLONE="Cloning repository into ~/.nano-config..."
 fi
+
+DEFAULT_REPO_DIR="$HOME/.nano-config"
 
 if [[ -n "$BASH_SOURCE" ]]; then
     REPO_DIR="$(cd "$(dirname "$BASH_SOURCE")" && pwd)"
 else
-    REPO_DIR="$(pwd)"
+    if [ ! -d "$DEFAULT_REPO_DIR" ]; then
+        echo "📥 $MSG_CLONE"
+        git clone https://github.com/michael-lehn/nano-config.git "$DEFAULT_REPO_DIR"
+    fi
+    cd "$DEFAULT_REPO_DIR"
+    REPO_DIR="$DEFAULT_REPO_DIR"
 fi
+
 HOME_DIR="$HOME"
 
 SRC_RC="$REPO_DIR/nanorc"
