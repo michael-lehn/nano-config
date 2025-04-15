@@ -58,7 +58,12 @@ echo ""
 echo "$MSG_TABLE_HEADER"
 echo "------------------|-------------------|----------"
 for name in ".nanorc" ".nano" ".nano-config"; do
-    printf "%-17s| %-18s| %s\n" "$name" "${TYPE[$name]}" "${REMOVE[$name] == "yes" && "$MSG_YES" || "$MSG_NO"}"
+    if [[ "${REMOVE[$name]}" == "yes" ]]; then
+        status="$MSG_YES"
+    else
+        status="$MSG_NO"
+    fi
+    printf "%-17s| %-18s| %s\n" "$name" "${TYPE[$name]}" "$status"
 done
 echo ""
 
