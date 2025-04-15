@@ -2,89 +2,80 @@
 
 set -e
 
-# --- Argumentverarbeitung ---
-NONINTERACTIVE=0
-if [[ "$1" == "--noninteractive" ]]; then
-    NONINTERACTIVE=1
-fi
-
 # --- Sprachumschaltung ---
 if [[ "$LANG" =~ ^de ]]; then
+    MSG_TABLE_HEADER="Datei            | Typ               | Löschen?"
+    MSG_LINK="symbolischer Link"
+    MSG_OTHER="kein Link"
+    MSG_YES="ja"
+    MSG_NO="nein"
     MSG_REMOVING="Entferne symbolischen Link:"
-    MSG_RESTORING="Wiederherstellen von Sicherung"
-    MSG_NO_BACKUP="Keine Sicherung gefunden"
-    MSG_PROMPT_RESTORE="Möchtest du eine Sicherung wiederherstellen? [j/N]"
-    MSG_PROMPT_DELETE_REPO="Möchtest du das automatisch geklonte Repository ~/.nano-config ebenfalls löschen? [j/N]"
     MSG_DONE="Fertig!"
     MSG_DELETED="Gelöscht:"
 else
+    MSG_TABLE_HEADER="File             | Type              | Remove?"
+    MSG_LINK="symbolic link"
+    MSG_OTHER="not a link"
+    MSG_YES="yes"
+    MSG_NO="no"
     MSG_REMOVING="Removing symbolic link:"
-    MSG_RESTORING="Restoring backup"
-    MSG_NO_BACKUP="No backup found"
-    MSG_PROMPT_RESTORE="Do you want to restore a backup? [y/N]"
-    MSG_PROMPT_DELETE_REPO="Do you also want to delete the auto-cloned repository ~/.nano-config? [y/N]"
     MSG_DONE="Done!"
     MSG_DELETED="Deleted:"
 fi
 
 HOME_DIR="$HOME"
+AUTO_REPO="$HOME_DIR/.nano-config"
 
-restore_latest_backup() {
-    local base="$1"
-    local latest=""
-    for f in "$HOME_DIR"/$base.saved.*; do
-        if [ -e "$f" ]; then
-            latest="$f"
-        fi
-    done
+# --- erkennen, ob wir via `curl | bash` laufen ---
+IS_CURL_RUN=0
+[[ "$0" == "bash" && ! -t 0 ]] && IS_CURL_RUN=1
 
-    if [ -n "$latest" ]; then
-        echo "🔄 $MSG_RESTORING: $latest → $HOME_DIR/$base"
-        mv "$latest" "$HOME_DIR/$base"
+# --- vorbereiten ---
+declare -A TYPE
+declare -A REMOVE
+
+for name in ".nanorc" ".nano" ".nano-config"; do
+    full="$HOME_DIR/$name"
+    if [ -L "$full" ]; then
+        TYPE["$name"]="$MSG_LINK"
+        REMOVE["$name"]="yes"
+    elif [ -e "$full" ]; then
+        TYPE["$name"]="$MSG_OTHER"
+        REMOVE["$name"]="no"
     else
-        echo "⚠️  $MSG_NO_BACKUP: $base"
+        TYPE["$name"]="-"
+        REMOVE["$name"]="no"
     fi
-}
+done
 
-remove_and_optionally_restore() {
-    local target="$1"
-    local base=$(basename "$target")
+# Spezialregel für .nano-config
+if [[ "${REMOVE[".nano-config"]}" == "yes" && "$IS_CURL_RUN" -eq 0 ]]; then
+    REMOVE[".nano-config"]="no"
+fi
 
-    if [ -L "$target" ]; then
-        echo "🗑  $MSG_REMOVING $target"
-        rm "$target"
+# --- Tabelle anzeigen ---
+echo ""
+echo "$MSG_TABLE_HEADER"
+echo "------------------|-------------------|----------"
+for name in ".nanorc" ".nano" ".nano-config"; do
+    printf "%-17s| %-18s| %s\n" "$name" "${TYPE[$name]}" "${REMOVE[$name] == "yes" && "$MSG_YES" || "$MSG_NO"}"
+done
+echo ""
 
-        if [[ "$NONINTERACTIVE" -eq 0 ]]; then
-            read -r -p "❓ $MSG_PROMPT_RESTORE " answer
-            if [[ "$LANG" =~ ^de ]]; then
-                [[ "$answer" =~ ^[Jj] ]] && restore_latest_backup "$base"
-            else
-                [[ "$answer" =~ ^[Yy] ]] && restore_latest_backup "$base"
-            fi
-        fi
-    else
-        echo "ℹ️  $target is not a symbolic link – skipping."
+# --- löschen ---
+for name in ".nanorc" ".nano"; do
+    full="$HOME_DIR/$name"
+    if [[ "${REMOVE[$name]}" == "yes" ]]; then
+        echo "🗑  $MSG_REMOVING $full"
+        rm "$full"
     fi
-}
+done
 
-remove_and_optionally_restore "$HOME_DIR/.nanorc"
-remove_and_optionally_restore "$HOME_DIR/.nano"
-
-# --- Optionales Löschen von ~/.nano-config ---
-AUTO_REPO="$HOME/.nano-config"
-if [[ "$(pwd)" != "$AUTO_REPO" ]] && [ -d "$AUTO_REPO" ]; then
-    if [[ "$NONINTERACTIVE" -eq 1 ]]; then
-        rm -rf "$AUTO_REPO"
-        echo "🗑️  $MSG_DELETED $AUTO_REPO"
-    else
-        echo ""
-        read -r -p "❓ $MSG_PROMPT_DELETE_REPO " answer
-        if [[ "$LANG" =~ ^de ]]; then
-            [[ "$answer" =~ ^[Jj] ]] && rm -rf "$AUTO_REPO" && echo "🗑️  $MSG_DELETED $AUTO_REPO"
-        else
-            [[ "$answer" =~ ^[Yy] ]] && rm -rf "$AUTO_REPO" && echo "🗑️  $MSG_DELETED $AUTO_REPO"
-        fi
-    fi
+# --- .nano-config löschen falls erlaubt ---
+if [[ "${REMOVE[".nano-config"]}" == "yes" ]]; then
+    echo "🗑  $MSG_REMOVING $AUTO_REPO"
+    rm -rf "$AUTO_REPO"
+    echo "🗑️  $MSG_DELETED $AUTO_REPO"
 fi
 
 echo "✅ $MSG_DONE"
