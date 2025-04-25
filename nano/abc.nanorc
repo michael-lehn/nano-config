@@ -5,6 +5,7 @@ color green "\<(label|fn|_fn|for|do|while|if|else|then|local|global|static|exter
 
 color green "\<(goto|continue|break|return)\>"
 color red "^[[:space:]]*#[[:space:]]*(define|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
+color red "^[[:space:]]*@[[:space:]]*"
 color brightred "'([^'\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
 
 ##
@@ -12,10 +13,10 @@ color brightred "'([^'\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0
 color green "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
 
 #Operator Color
-color black "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
+color normal "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
 
 #Parenthetical Color
-color black "[(){}]" "\[" "\]"
+color normal "[(){}]" "\[" "\]"
 
 
 ##
