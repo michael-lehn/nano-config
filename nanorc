@@ -5,6 +5,7 @@ set linenumbers
 set guidestripe 81
 set whitespace "> "
 set mouse
+set autoindent
 
 set titlecolor brightwhite,yellow
 set keycolor white,blue
